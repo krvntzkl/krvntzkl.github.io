@@ -1,0 +1,28 @@
+import"./html2canvas.esm-DZbuWhpW.js";import{c as T,e as B,d as U}from"./gifExport-DlEZNaTM.js";function D(e,a,r,o){const n=document.createElement("canvas");n.width=a,n.height=r;const t=n.getContext("2d");if(!t)throw new Error("2d context");const i=new Uint8ClampedArray(e);t.putImageData(new ImageData(i,a,r),0,0);const s=Math.round(r*(44/256)),g=Math.round((r-s)/2);t.fillStyle="#000000",t.fillRect(0,g,a,s);const l=Math.max(16,Math.round(s*.46));t.font=`700 ${l}px Metamorphous, "Libre Bodoni", Georgia, serif`,t.textAlign="center",t.textBaseline="middle";const c=a/2,d=g+s/2,p=o.toUpperCase(),h=Math.max(3,Math.round(l*.15));return t.lineWidth=h,t.lineJoin="round",t.miterLimit=2,t.strokeStyle="#000000",t.fillStyle="#ff3838",t.strokeText(p,c,d),t.fillText(p,c,d),new Uint8Array(t.getImageData(0,0,a,r).data.buffer)}const k=[{key:"Vadim Samoilov",pseudo:"V.A.D.I.M.",portraitUrl:"/pilots/vadim.png",accent:"#9b7aff"},{key:"Gleb Samoilov",pseudo:"GLEBB",portraitUrl:"/pilots/gleb.png",accent:"#6ecf8b"},{key:"Konis",pseudo:"ALEX K.",portraitUrl:"/pilots/konis.png",accent:"#ff9955"},{key:"Shura",pseudo:"ANDREY",portraitUrl:"/pilots/shura.png",accent:"#ff5588"},{key:"Micha",pseudo:"MICHA",portraitUrl:"/pilots/micha.png",accent:"#55ddff"}],u=512,x=k.length;function I(){return new Promise(e=>{requestAnimationFrame(()=>{requestAnimationFrame(()=>e())})})}function L(){return Promise.all(k.map(e=>new Promise((a,r)=>{const o=new Image;o.onload=()=>a(),o.onerror=()=>r(new Error(`Portrait: ${e.portraitUrl}`)),o.src=e.portraitUrl}))).then(()=>{})}function G(e,a,r){a.src=e.portraitUrl,a.alt=e.key,r.textContent=e.pseudo}function C(e,a){const r=x*a,o=(e%r+r)%r,n=Math.min(x-1,Math.floor(o/a)),t=o-n*a;return{pilot:k[n],tLocal:t,showBand:t>=a/2}}function A(e,a,r,o,n,t){const{pilot:i,showBand:s}=C(e,a);if(G(i,r,n),t){o.classList.remove("discord-avatar-ticker-wrap--on");return}if(!s){o.classList.remove("discord-avatar-ticker-wrap--on");return}o.classList.add("discord-avatar-ticker-wrap--on")}function R(){const e=document.getElementById("root");if(!e)throw new Error("#root");e.innerHTML=`
+    <div class="discord-tools-page">
+      <header class="discord-tools-header">
+        <a class="discord-tools-back" href="./">← Retour au jeu</a>
+        <h1>Avatar animé Discord (512×512)</h1>
+        <p>
+          Séquence des <strong>${x} pilotes</strong> : export <strong>512×512</strong>, pseudos dessinés en <strong>Canvas</strong> (contour + remplissage) pour rester lisibles dans le GIF 256 couleurs — pas le texte HTML capturé.
+          <a href="./discord-banner.html" style="color:#88aaff;margin-left:0.35rem">← Bannière</a>
+        </p>
+      </header>
+      <div class="discord-tools-controls">
+        <label>T par pilote (s) <input type="number" id="tsec" min="1.5" max="10" step="0.5" value="4" /></label>
+        <label>IPS <input type="number" id="fps" min="6" max="20" step="1" value="12" /></label>
+        <button type="button" class="discord-tools-btn" id="export">Exporter le GIF (tous les pilotes)</button>
+      </div>
+      <p class="discord-tools-status" id="status"></p>
+      <div class="discord-preview-wrap">
+        <div class="discord-avatar-scale" id="avatar-scale">
+          <div id="avatar-stage" class="discord-avatar-stage">
+            <img id="avatar-img" class="discord-avatar-portrait" alt="" />
+            <div id="avatar-ticker-wrap" class="discord-avatar-ticker-wrap" aria-hidden="true">
+              <span id="avatar-ticker-text" class="discord-avatar-ticker-track"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;const a=e.querySelector("#avatar-stage"),r=e.querySelector("#avatar-img"),o=e.querySelector("#avatar-ticker-wrap"),n=e.querySelector("#avatar-ticker-text"),t=e.querySelector("#status"),i=e.querySelector("#export"),s=e.querySelector("#tsec"),g=e.querySelector("#fps"),l=e.querySelector("#avatar-scale");L().catch(()=>{t.textContent="Impossible de précharger un portrait — vérifie le dossier public/pilots."});let c=0,d=performance.now();function p(){const m=Math.max(.5,Number(s.value)||4),f=(performance.now()-d)/1e3;A(f,m,r,o,n,!1),c=requestAnimationFrame(p)}c=requestAnimationFrame(p),s.addEventListener("change",()=>{d=performance.now()});const h=()=>{const b=Math.min(window.innerWidth-40,window.innerHeight-260,720),w=Math.max(1,b/u);l.style.transform=`scale(${w})`};h(),window.addEventListener("resize",h),i.addEventListener("click",async()=>{const m=Math.max(.5,Number(s.value)||4),f=Math.max(6,Math.min(20,Math.round(Number(g.value)||12))),b=x*m,w=Math.max(1,Math.round(b*f));i.disabled=!0,cancelAnimationFrame(c),t.textContent="Préchargement…";try{await L()}catch{t.textContent="Échec du préchargement des portraits.",i.disabled=!1,d=performance.now(),c=requestAnimationFrame(p);return}await document.fonts.ready,t.textContent="Capture…";const M=[],q=l.style.transform;try{l.style.transform="none",a.classList.add("discord-avatar-stage--export"),await I();for(let y=0;y<w;y++){const E=y/f;A(E,m,r,o,n,!0);const{pilot:F,showBand:P}=C(E,m);t.textContent=`Capture ${y+1} / ${w}…`,await I();let S=await T(a,u,u,{scale:1});P&&(S=D(S,u,u,F.pseudo)),M.push(S)}t.textContent="Encodage GIF…";const v=B(M,{width:u,height:u,fps:f});U(new Blob([v],{type:"image/gif"}),"kover-vertolet-avatar-tous-pilotes.gif"),t.textContent="Terminé — fichier téléchargé."}catch(v){console.error(v),t.textContent=`Erreur : ${v instanceof Error?v.message:String(v)}`}finally{a.classList.remove("discord-avatar-stage--export"),l.style.transform=q,i.disabled=!1,d=performance.now(),c=requestAnimationFrame(p)}}),window.addEventListener("beforeunload",()=>{cancelAnimationFrame(c)})}R();
